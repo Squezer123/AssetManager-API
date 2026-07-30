@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EquipmentStatus {
+  AVAILABLE
+  MAINTENANCE
+  RETIRED
+}
+
+enum EquipmentCategory {
+  LAPTOP
+  PHONE
+  CAMERA
+  OTHER
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CANCELLED
+  RETURNED
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  name         String?
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  reservations Reservation[]
+}
+
+model Equipment {
+  id           String            @id @default(cuid())
+  name         String
+  description  String?
+  category     EquipmentCategory
+  status       EquipmentStatus   @default(AVAILABLE)
+  bufferDays   Int               @default(1)
+  imageUrl     String?
+  createdAt    DateTime          @default(now())
+
+  reservations Reservation[]
+  laptopSpec   LaptopSpec?
+  phoneSpec    PhoneSpec?
+  cameraSpec   CameraSpec?
+}
+
+model LaptopSpec {
+  id           String    @id @default(cuid())
+  equipmentId  String    @unique
+  equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  manufacturer String
+  cpu          String
+  ram          String
+  storage      String
+  os           String
+}
+
+model PhoneSpec {
+  id           String    @id @default(cuid())
+  equipmentId  String    @unique
+  equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  manufacturer String
+  model        String
+  storage      String
+  os           String
+  imei         String?
+}
+
+model CameraSpec {
+  id           String    @id @default(cuid())
+  equipmentId  String    @unique
+  equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  manufacturer String
+  sensorType   String?
+  resolution   String?
+  lensMount    String?
+}
+
+model Reservation {
+  id          String             @id @default(cuid())
+  userId      String
+  equipmentId String
+  startDate   DateTime
+  endDate     DateTime
+  status      ReservationStatus  @default(ACTIVE)
+  createdAt   DateTime           @default(now())
+  returnedAt  DateTime?
+  cancelledAt DateTime?
+  cancelledBy String?
+
+  user      User      @relation(fields: [userId], references: [id])
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId, startDate, endDate])
+}
