@@ -21,13 +21,11 @@ import { EditReservationDto } from './dto/edit-reservation.dto';
 export class ReservationsController {
   constructor(private reservationsService: ReservationsService) {}
 
-  // Wlasna historia rezerwacji - odpowiednik strony Home (app/page.js)
   @Get('me')
   findMine(@Req() req) {
     return this.reservationsService.findAllForUser(req.user.id);
   }
 
-  // Wszystkie rezerwacje - odpowiednik /admin/reservations
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Get()
@@ -59,7 +57,6 @@ export class ReservationsController {
     return this.reservationsService.edit(id, dto, req.user.id, req.user.role === 'ADMIN');
   }
 
-  // Calkowite usuniecie - tylko admin
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Delete(':id')

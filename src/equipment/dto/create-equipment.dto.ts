@@ -57,8 +57,6 @@ export class CreateEquipmentDto {
   @IsString()
   imageUrl?: string;
 
-  // Tylko jedno z ponizszych powinno byc wyslane, zaleznie od `category`
-  // (walidacja tej spojnosci dzieje sie w serwisie, nie tutaj)
   @IsOptional()
   @ValidateNested()
   @Type(() => LaptopSpecDto)

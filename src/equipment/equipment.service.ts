@@ -17,8 +17,7 @@ export class EquipmentService {
   async findAll() {
     return this.prisma.equipment.findMany({
       include: {
-        // Tylko aktywne rezerwacje sa potrzebne do policzenia dostepnosci,
-        // dokladnie tak samo jak w Next.js EquipmentPage
+
         reservations: {
           where: {
             status: 'ACTIVE',
@@ -52,9 +51,6 @@ export class EquipmentService {
   async create(dto: CreateEquipmentDto) {
     const expectedSpecField = SPEC_FIELD_BY_CATEGORY[dto.category];
 
-    // Spojnosc category <-> spec pilnowana tutaj, w jednym miejscu - patrz
-    // wczesniejsza uwaga o tym, ze baza tego nie wymusza (relacje 1:1
-    // opcjonalne), wiec to musi zrobic warstwa aplikacji
     if (expectedSpecField) {
       const providedSpec = dto[expectedSpecField];
       if (!providedSpec) {
@@ -84,7 +80,7 @@ export class EquipmentService {
   }
 
   async update(id: string, dto: UpdateEquipmentDto) {
-    await this.findOne(id); // rzuci 404, jesli nie istnieje
+    await this.findOne(id); 
 
     return this.prisma.equipment.update({
       where: { id },
@@ -95,10 +91,7 @@ export class EquipmentService {
   async remove(id: string) {
     await this.findOne(id);
 
-    // Uwaga: Equipment -> Reservation ma onDelete: Cascade w schema.prisma,
-    // wiec usuniecie sprzetu skasuje TAKZE cala jego historie rezerwacji
-    // (w tym zwrocone/anulowane) - to swiadoma decyzja z wczesniejszej
-    // czesci projektu, ale warto ja tu przypomniec w komentarzu.
+
     return this.prisma.equipment.delete({ where: { id } });
   }
 }

@@ -27,9 +27,6 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    // Rola NIGDY nie jest przyjmowana z requestu rejestracji - zawsze USER.
-    // Nadawanie roli ADMIN pozostaje reczne, bezposrednio w bazie (zgodnie
-    // z zalozeniami calego projektu - brak panelu do zarzadzania rolami).
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,

@@ -19,8 +19,7 @@ import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 export class EquipmentController {
   constructor(private equipmentService: EquipmentService) {}
 
-  // Katalog jest publiczny (bez guarda) - odpowiednik tego, ze przegladanie
-  // katalogu w Next.js nie wymagalo logowania, tylko rezerwacja go wymagala
+
   @Get()
   findAll() {
     return this.equipmentService.findAll();

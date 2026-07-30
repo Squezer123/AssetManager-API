@@ -67,8 +67,3 @@ Backend **nie uzywa NextAuth** — to osobny mechanizm oparty o JWT, niezalezny 
 - Fazy rezerwacji (`FUTURE` / `IN_PROGRESS` / `CLOSED`) i uprawnienia zalezne od fazy — dokladnie te same reguly, co ustalilismy przy projektowaniu `PATCH /api/reservations/[id]` w Next.js.
 - Walidacja godzin roboczych (8:00–18:00), pelnych godzin, minimum 1 godziny dla trybu godzinowego.
 
-## Czego brakuje / do dopisania
-
-- Endpointy do zarzadzania specyfikacjami sprzetu po utworzeniu (`PATCH /equipment/:id/spec`) — na razie spec ustawia sie tylko przy tworzeniu.
-- Upload zdjecia sprzetu (obecnie tylko `imageUrl` jako string, tak jak w Next.js).
-- Testy (e2e/unit) — projekt NestJS domyslnie ma pod to gotowa strukture (`@nestjs/testing`), ale nie zostaly tu napisane.

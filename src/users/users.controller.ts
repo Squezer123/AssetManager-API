@@ -7,8 +7,7 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  // Odpowiednik `session.user` w Twoim Home (app/page.js) - dane profilu
-  // zalogowanego usera, do wyswietlenia "Witaj, ..."
+
   @Get('me')
   me(@Req() req) {
     return this.usersService.findById(req.user.id);

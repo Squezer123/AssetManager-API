@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { EditReservationDto } from './dto/edit-reservation.dto';
+import { Prisma } from '@prisma/client';
 
 const BUSINESS_HOUR_START = 8;
 const BUSINESS_HOUR_END = 18;
@@ -28,7 +29,6 @@ function getPhase(reservation: { status: string; startDate: Date }) {
 export class ReservationsService {
   constructor(private prisma: PrismaService) {}
 
-  // --- Odczyt ---
 
   findAllForUser(userId: string) {
     return this.prisma.reservation.findMany({
@@ -86,7 +86,6 @@ export class ReservationsService {
     });
   }
 
-  // --- Anulowanie / edycja / zwrot (odpowiednik PATCH /api/reservations/[id]) ---
 
   async cancel(id: string, userId: string, isAdmin: boolean) {
     const reservation = await this.getOwnedOrAdmin(id, userId, isAdmin);
@@ -121,8 +120,7 @@ export class ReservationsService {
     }
 
     const now = new Date();
-    // Jesli zwrot nastapil przed planowanym koncem, endDate skraca sie do
-    // rzeczywistego momentu zwrotu - tak samo jak w Next.js route handlerze
+
     const actualEnd = now < new Date(reservation.endDate) ? now : reservation.endDate;
 
     return this.prisma.reservation.update({
@@ -181,7 +179,6 @@ export class ReservationsService {
     });
   }
 
-  // --- Usuwanie calkowite (odpowiednik DELETE /api/reservations/[id], admin-only) ---
 
   async remove(id: string) {
     const reservation = await this.prisma.reservation.findUnique({ where: { id } });
@@ -193,31 +190,29 @@ export class ReservationsService {
     return { deleted: true };
   }
 
-  // --- Prywatne helpery ---
 
-  private async getOwnedOrAdmin(
+  private async getOwnedOrAdmin<T extends Prisma.ReservationInclude = {}>(
     id: string,
     userId: string,
     isAdmin: boolean,
-    extraArgs: Record<string, unknown> = {},
-  ) {
+    extraArgs: { include?: T } = {},
+  ): Promise<Prisma.ReservationGetPayload<{ include: T }>> {
     const reservation = await this.prisma.reservation.findUnique({
       where: { id },
       ...extraArgs,
-    });
-
+    } as Prisma.ReservationFindUniqueArgs);
+  
     if (!reservation) {
       throw new NotFoundException('Rezerwacja nie znaleziona');
     }
-
+  
     if (reservation.userId !== userId && !isAdmin) {
       throw new ForbiddenException('Brak dostepu do tej rezerwacji');
     }
-
-    return reservation;
+  
+    return reservation as Prisma.ReservationGetPayload<{ include: T }>;
   }
 
-  // Odpowiednik validateDailyReservationInput / validateHourlyReservationInput z Next.js
   private validateReservationDates(startDate: Date, endDate: Date, isHourlyMode: boolean) {
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       throw new BadRequestException('Pola "startDate" i "endDate" musza byc poprawnymi datami');
@@ -245,7 +240,6 @@ export class ReservationsService {
       return { startDate: start, endDate: end };
     }
 
-    // Tryb godzinowy
     const now = new Date();
     if (startDate < now) {
       throw new BadRequestException('Wybrany termin jest w przeszlosci');
@@ -287,8 +281,6 @@ export class ReservationsService {
     return { startDate, endDate };
   }
 
-  // Odpowiednik zapytania kolizyjnego z route.js - z opcjonalnym wykluczeniem
-  // wlasnego id (potrzebne przy edycji, zeby rezerwacja nie "kolidowala sama ze soba")
   private async assertNoCollision(
     equipment: { id: string; bufferDays: number },
     startDate: Date,

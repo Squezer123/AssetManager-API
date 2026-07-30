@@ -2,9 +2,6 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 
-// Odpowiednik: `if (session.user.role !== "ADMIN") return 403`
-// powtarzanego w kazdym Twoim route handlerze w Next.js - tutaj to jedna
-// wspolna warstwa, ktora sama sprawdza wymagana role z dekoratora @Roles(...)
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -16,7 +13,7 @@ export class RolesGuard implements CanActivate {
     ]);
 
     if (!requiredRoles || requiredRoles.length === 0) {
-      return true; // brak dekoratora @Roles -> kazdy zalogowany user moze wejsc
+      return true; 
     }
 
     const { user } = context.switchToHttp().getRequest();
